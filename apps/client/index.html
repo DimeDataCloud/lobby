@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Default name. VITE_PRODUCT_NAME overrides it at runtime (see main.ts), so
+       a deployment can rename itself without editing the repo. -->
+  <title>Lobby</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
+      background: #0d0d0f;
+      color: #e0e0e6;
+      font-size: 13px;
+      overflow: hidden;
+    }
+    #app { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+**/node_modules
+**/dist
+**/*.db
+**/*.db-wal
+**/*.db-shm
+.git
+.pids
+logs
+tmp
+lobby-plugin/test
+apps/server/test
+# Screenshots written by ops/browser-check.mjs. Megabytes of PNGs, and nothing in
+# the image reads them.
+.browser-check
+**/.DS_Store

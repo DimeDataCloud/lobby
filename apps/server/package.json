@@ -1,0 +1,14 @@
+{
+  "name": "observability-server",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "start": "bun run src/index.ts",
+    "test": "bun test",
+    "test:auth": "bun run test/integration/auth.ts",
+    "test:multiplayer": "bun run test/integration/multiplayer.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

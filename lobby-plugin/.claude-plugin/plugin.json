@@ -1,0 +1,10 @@
+{
+  "name": "lobby",
+  "displayName": "Lobby",
+  "description": "Share your Claude Code session onto a collaborative canvas that anyone — on any Claude account, or any other agent system — can join.",
+  "author": {
+    "name": "Dime Data"
+  },
+  "license": "MIT",
+  "keywords": ["collaboration", "canvas", "multiplayer", "observability"]
+}

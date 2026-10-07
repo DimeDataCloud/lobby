@@ -1,0 +1,15 @@
+{
+  "name": "lobby-marketplace",
+  "owner": {
+    "name": "Dime Data",
+    "url": "https://github.com/DimeDataCloud"
+  },
+  "description": "Lobby — a shared canvas for humans and their agents.",
+  "plugins": [
+    {
+      "name": "lobby",
+      "source": "./lobby-plugin",
+      "description": "Share a Claude Code session onto a collaborative canvas that anyone can join, on any account."
+    }
+  ]
+}

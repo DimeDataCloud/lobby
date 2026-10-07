@@ -1,0 +1,108 @@
+# Deployment. Two rules here are load-bearing:
+#
+# 1. NO `ports:` MAPPING, EVER. Docker publishes ports by writing DNAT rules
+#    that are traversed BEFORE ufw's INPUT chain, so `-p 4000:4000` opens the
+#    port to the whole internet no matter what ufw says. The reverse proxy
+#    reaches this container over the shared network by DNS name; nothing needs
+#    publishing.
+#
+# 2. Its OWN network, not whatever network the host's other services share. An
+#    internet-facing multi-tenant service must not sit alongside unrelated
+#    workloads holding customer data — a compromise here would otherwise be
+#    lateral movement straight into them. The proxy is deliberately dual-homed;
+#    nothing else is.
+#
+# The network is created by hand and declared external so compose does not
+# prefix it with the project directory name (which would break the
+# `docker network connect` that attaches the proxy).
+
+services:
+  lobby:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lobby:latest
+    container_name: lobby
+    restart: unless-stopped
+    expose:
+      - "4000"
+    environment:
+      SERVER_PORT: "4000"
+      DB_PATH: /data/events.db
+      STATIC_DIR: /app/public
+      # Enforced auth. An unlisted URL is not access control.
+      REQUIRE_AUTH: "true"
+      # WebSockets are not covered by CORS, so the allowed origin is explicit.
+      # Set PUBLIC_ORIGIN in .env beside this file — the deployment domain is
+      # configuration, not something baked into the repo.
+      ALLOWED_ORIGINS: ${PUBLIC_ORIGIN:?set PUBLIC_ORIGIN in .env}
+      PRODUCT_NAME: ${PRODUCT_NAME:-Lobby}
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN}
+      WS_MAX_PAYLOAD: "262144"
+      WS_BACKPRESSURE: "1048576"
+      # Losing this volume loses every customer's board, so backups are not
+      # optional in a deployment. Verified on write; a file that fails is deleted
+      # rather than kept, because a corrupt backup is the one you reach for.
+      BACKUP_DIR: /data/backups
+      BACKUP_KEEP: ${BACKUP_KEEP:-14}
+      BACKUP_INTERVAL_MS: ${BACKUP_INTERVAL_MS:-21600000}
+      AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS:-365}
+      # The agent event stream is the fastest-growing table here and had no
+      # retention at all. Board content — artifacts, messages, annotations — is
+      # never deleted by age, and events still referenced by a live artifact or an
+      # annotation are kept regardless of this window. 0 disables age-based
+      # deletion entirely.
+      EVENT_RETENTION_DAYS: ${EVENT_RETENTION_DAYS:-90}
+      # Behind a reverse proxy, so X-Forwarded-For is ours to believe. Without
+      # this the header is ignored and every caller shares one rate-limit bucket.
+      TRUST_PROXY: "1"
+      # Operator-only backup status at /admin/backups. Unset = the route 404s.
+      ADMIN_KEY: ${ADMIN_KEY:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      # Email sign-in. This is the path that needs no app registration, so it is
+      # the one that decides whether a stranger can create an account at all.
+      # Set SMTP2GO_API_KEY (or RESEND_API_KEY) and MAIL_FROM in .env; with
+      # neither, /auth/providers simply omits email and the sign-in screen says so
+      # in plain language.
+      SMTP2GO_API_KEY: ${SMTP2GO_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-Lobby}
+      # NODE_ENV=production also hard-disables the log-only mail transport, which
+      # would otherwise print working sign-in links into the container log.
+      NODE_ENV: production
+    volumes:
+      - lobby_data:/data
+    networks:
+      - lobby_net
+    # 3.8GB box with six other containers. Bun reads the cgroup limit, and
+    # --smol in the entrypoint keeps the heap modest.
+    mem_limit: 512m
+    memswap_limit: 512m
+    # Reap zombies from any short-lived child processes.
+    init: true
+    healthcheck:
+      # Exec form invoking bun: these images have no curl, and the CRM on this
+      # same box already taught us that lesson.
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:4000/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  lobby_net:
+    external: true
+    name: lobby_net
+
+volumes:
+  lobby_data:
+    name: lobby_data

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "lobby": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/server.mjs"],
+      "env": {
+        "LOBBY_SERVER_URL": "${LOBBY_SERVER_URL:-http://localhost:4000}"
+      }
+    }
+  }
+}

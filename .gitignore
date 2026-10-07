@@ -1,0 +1,35 @@
+# Database
+*.db
+*.db-wal
+*.db-shm
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Runtime state
+.pids/
+logs/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+# ops/browser-check.mjs screenshots — evidence from the last run, not source
+.browser-check/
+
+# artifact-render test scratch (cleaned on success; left behind on failure)
+.art-entry.js
+.art-bundle.cjs
+
+# Generated from the root markdown by scripts/build-legal.mjs on every build.
+# Committing them invites drift between the policy and the page.
+apps/client/public/legal/
+!.env.example

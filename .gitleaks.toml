@@ -1,0 +1,8 @@
+# The redaction tests feed fake credentials through the relay to prove they never
+# leave the machine. They are fixtures, not secrets.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Redaction test fixtures"
+paths = ['''lobby-plugin/test/relay\.test\.mjs''']
