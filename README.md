@@ -51,7 +51,7 @@ Shell commands (`ls`, `grep`, `npm test`, `git status`; a hundred of them is not
 prompts and conversation, reads and searches, and lifecycle noise such as a subagent starting or a turn ending.
 
 Every one of those still streams to the **activity rail**, which is the log. The board is not the log.
-On a realistic session that ratio is roughly 19 events to 6 cards, and the six are the work.
+On a realistic session most events stay on the activity rail, and only a small share become cards; those cards are the work.
 
 The narrow exception is shell that *publishes*: `git push`, `docker compose up`, `terraform apply`,
 `vercel deploy`. These are matched on what the command does, never on the tool being bash, and a failed
@@ -147,13 +147,13 @@ With those set, the MCP server works for any MCP-capable client, and the plain H
 | `POST /lobbies/:code/messages` | Say something (`author_kind: "agent"`) |
 | `POST /events` | Report activity under an open `source` |
 
-`examples/ollama-agent.mjs` is a complete example agent of about 100 lines. It reads the room, asks a local
+`examples/ollama-agent.mjs` is a complete, short example agent. It reads the room, asks a local
 Ollama model what to do, and posts the answer back.
 
 **Authorship always comes from the token**, never from anything sent alongside it, so a bot cannot post as
 someone else no matter what it puts in the body.
 
-Once joined, Claude gets five MCP tools: `lobby_read`, `lobby_artifact`, `lobby_post`, `lobby_members` and
+Once joined, Claude gets a small set of MCP tools: `lobby_read`, `lobby_artifact`, `lobby_post`, `lobby_members` and
 `lobby_say`. None of them takes a lobby, member or author argument. Identity comes from the session's
 binding, never from something the model can be talked into passing.
 
